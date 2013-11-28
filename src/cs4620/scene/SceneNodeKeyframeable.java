@@ -148,8 +148,8 @@ implements Keyframeable {
 				float Bweight = (Math.abs(diff-wall))/diff;
 				
 
-				System.out.println(""+Tweight);
-				System.out.println(""+Bweight);
+				/*System.out.println(""+Tweight);
+				System.out.println(""+Bweight);*/
 				
 				 Random randomno = new Random();
 				
