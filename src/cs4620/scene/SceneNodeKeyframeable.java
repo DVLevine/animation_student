@@ -60,13 +60,13 @@ implements Keyframeable {
 		keyframeNode.rotation.set(rotation);
 		keyframeNode.scaling.set(scaling);
 		keyframeNode.translation.set(translation);
-		
+
 		/*
 		System.out.println("x trans "+keyframeNode.translation.x);
 		System.out.println("y trans "+keyframeNode.translation.y);
 		System.out.println("z trans "+keyframeNode.translation.z);
 		System.out.println("------------------------------------");
-*/
+		 */
 		keyframes.put(frame, keyframeNode);
 	}
 
@@ -97,37 +97,16 @@ implements Keyframeable {
 			SceneNode bing = keyframes.get(frame);
 			this.setTranslation(bing.translation.x, bing.translation.y, bing.translation.z);
 			this.setScaling(bing.scaling.x, bing.scaling.y, bing.scaling.z);
+			return;
 		}
 		else{
 			if (keyframes.ceilingKey(frame)==null && keyframes.floorKey(frame)==null){
 				return;
 			}
 			else if (keyframes.ceilingKey(frame)==null){
-				/*int lowerBound = keyframes.floorKey(frame);
-				SceneNode bottom = keyframes.get(lowerBound);	
-				 Random randomno = new Random();
-				this.setTranslation(
-						bottom.translation.x,
-						bottom.translation.y, 
-						bottom.translation.z);
-
-				this.setScaling(bottom.scaling.x,
-						bottom.scaling.y,
-						bottom.scaling.z);*/
 				return;
-
 			}
 			else if (keyframes.floorKey(frame) == null){
-				/*int upperBound = keyframes.ceilingKey(frame);
-				SceneNode top = keyframes.get(upperBound);
-
-				this.setTranslation(top.translation.x, 
-						top.translation.y, 
-						top.translation.z);
-
-				this.setScaling(top.scaling.x,
-						top.scaling.y,
-						top.scaling.z);*/
 				return;
 			}
 			else {	
@@ -138,27 +117,23 @@ implements Keyframeable {
 
 				SceneNode bottom = keyframes.get(lowerBound);
 				SceneNode top = keyframes.get(upperBound);
-				
+
 				//System.out.println(bottom.translation.z+"");
 				//System.out.println(top.translation.z+"");
-				
+
 				float diff = Math.abs(upperBound-lowerBound);
 				float wall = frame - lowerBound;
 				float Tweight = (diff - Math.abs(diff-wall))/diff;
 				float Bweight = (Math.abs(diff-wall))/diff;
-				
 
 				/*System.out.println(""+Tweight);
 				System.out.println(""+Bweight);*/
-				
-				 Random randomno = new Random();
-				
+
 				this.setTranslation(
-						(Bweight*bottom.translation.x + Tweight*top.translation.x), 
-						//(Bweight*randomno.nextFloat()),
+						(Bweight*bottom.translation.x + Tweight*top.translation.x),
 						(Bweight*bottom.translation.y + Tweight*top.translation.y), 
 						(Bweight*bottom.translation.z + Tweight*top.translation.z));
-				
+
 				/*System.out.println("x trans "+this.translation.x);
 				System.out.println("y trans "+this.translation.y);
 				System.out.println("z trans "+this.translation.z);
@@ -167,20 +142,21 @@ implements Keyframeable {
 				this.setScaling(
 						(Bweight*bottom.scaling.x+Tweight*top.scaling.x),
 						(Bweight*bottom.scaling.y+Tweight*top.scaling.y),
-						(Bweight*bottom.scaling.z+Tweight*top.scaling.z));					
-			}
-
+						(Bweight*bottom.scaling.z+Tweight*top.scaling.z));		
+			}	
 		}
 
-
-
-		//Get list of all the frames
-		//Search to see where the current frame is relative to all the frames
-		//find closest two frames and linearly interpolate for current frame
-
-
-
 	}
+
+
+
+	//Get list of all the frames
+	//Search to see where the current frame is relative to all the frames
+	//find closest two frames and linearly interpolate for current frame
+
+
+
+
 
 	@Override
 	public void catmullRomInterpolateTo(int frame) {
