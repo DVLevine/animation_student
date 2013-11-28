@@ -2,6 +2,7 @@ package cs4620.scene;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
@@ -59,7 +60,13 @@ implements Keyframeable {
 		keyframeNode.rotation.set(rotation);
 		keyframeNode.scaling.set(scaling);
 		keyframeNode.translation.set(translation);
-
+		
+		/*
+		System.out.println("x trans "+keyframeNode.translation.x);
+		System.out.println("y trans "+keyframeNode.translation.y);
+		System.out.println("z trans "+keyframeNode.translation.z);
+		System.out.println("------------------------------------");
+*/
 		keyframes.put(frame, keyframeNode);
 	}
 
@@ -96,19 +103,22 @@ implements Keyframeable {
 				return;
 			}
 			else if (keyframes.ceilingKey(frame)==null){
-				int lowerBound = keyframes.floorKey(frame);
+				/*int lowerBound = keyframes.floorKey(frame);
 				SceneNode bottom = keyframes.get(lowerBound);	
-				this.setTranslation(bottom.translation.x, 
+				 Random randomno = new Random();
+				this.setTranslation(
+						bottom.translation.x,
 						bottom.translation.y, 
 						bottom.translation.z);
 
 				this.setScaling(bottom.scaling.x,
 						bottom.scaling.y,
-						bottom.scaling.z);
+						bottom.scaling.z);*/
+				return;
 
 			}
 			else if (keyframes.floorKey(frame) == null){
-				int upperBound = keyframes.ceilingKey(frame);
+				/*int upperBound = keyframes.ceilingKey(frame);
 				SceneNode top = keyframes.get(upperBound);
 
 				this.setTranslation(top.translation.x, 
@@ -117,24 +127,47 @@ implements Keyframeable {
 
 				this.setScaling(top.scaling.x,
 						top.scaling.y,
-						top.scaling.z);
+						top.scaling.z);*/
+				return;
 			}
 			else {	
 				int upperBound = keyframes.ceilingKey(frame);
 				int lowerBound = keyframes.floorKey(frame);
-				System.out.println(lowerBound+"");
-				System.out.println(upperBound+ "");
+				//System.out.println(lowerBound+"");
+				//System.out.println(upperBound+ "");
 
 				SceneNode bottom = keyframes.get(lowerBound);
 				SceneNode top = keyframes.get(upperBound);
+				
+				//System.out.println(bottom.translation.z+"");
+				//System.out.println(top.translation.z+"");
+				
+				float diff = Math.abs(upperBound-lowerBound);
+				float wall = frame - lowerBound;
+				float Tweight = (diff - Math.abs(diff-wall))/diff;
+				float Bweight = (Math.abs(diff-wall))/diff;
+				
 
-				this.setTranslation((bottom.translation.x+top.translation.x)/2, 
-						(bottom.translation.y+top.translation.y)/2, 
-						(bottom.translation.z + top.translation.z)/2);
+				System.out.println(""+Tweight);
+				System.out.println(""+Bweight);
+				
+				 Random randomno = new Random();
+				
+				this.setTranslation(
+						(Bweight*bottom.translation.x + Tweight*top.translation.x), 
+						//(Bweight*randomno.nextFloat()),
+						(Bweight*bottom.translation.y + Tweight*top.translation.y), 
+						(Bweight*bottom.translation.z + Tweight*top.translation.z));
+				
+				/*System.out.println("x trans "+this.translation.x);
+				System.out.println("y trans "+this.translation.y);
+				System.out.println("z trans "+this.translation.z);
+				System.out.println("------------------------------------");*/
 
-				this.setScaling((bottom.scaling.x+top.scaling.x)/2,
-						(bottom.scaling.y+top.scaling.y)/2,
-						(bottom.scaling.z+top.scaling.z)/2);					
+				this.setScaling(
+						(Bweight*bottom.scaling.x+Tweight*top.scaling.x),
+						(Bweight*bottom.scaling.y+Tweight*top.scaling.y),
+						(Bweight*bottom.scaling.z+Tweight*top.scaling.z));					
 			}
 
 		}
