@@ -92,29 +92,54 @@ implements Keyframeable {
 			this.setScaling(bing.scaling.x, bing.scaling.y, bing.scaling.z);
 		}
 		else{
-			if (keyframes.size() >2){
+			if (keyframes.ceilingKey(frame)==null && keyframes.floorKey(frame)==null){
+				return;
+			}
+			else if (keyframes.ceilingKey(frame)==null){
+				int lowerBound = keyframes.floorKey(frame);
+				SceneNode bottom = keyframes.get(lowerBound);	
+				this.setTranslation(bottom.translation.x, 
+						bottom.translation.y, 
+						bottom.translation.z);
+
+				this.setScaling(bottom.scaling.x,
+						bottom.scaling.y,
+						bottom.scaling.z);
+
+			}
+			else if (keyframes.floorKey(frame) == null){
+				int upperBound = keyframes.ceilingKey(frame);
+				SceneNode top = keyframes.get(upperBound);
+
+				this.setTranslation(top.translation.x, 
+						top.translation.y, 
+						top.translation.z);
+
+				this.setScaling(top.scaling.x,
+						top.scaling.y,
+						top.scaling.z);
+			}
+			else {	
+				int upperBound = keyframes.ceilingKey(frame);
 				int lowerBound = keyframes.floorKey(frame);
 				System.out.println(lowerBound+"");
-				int upperBound = keyframes.ceilingKey(frame);
 				System.out.println(upperBound+ "");
+
 				SceneNode bottom = keyframes.get(lowerBound);
 				SceneNode top = keyframes.get(upperBound);
-				
+
 				this.setTranslation((bottom.translation.x+top.translation.x)/2, 
-									(bottom.translation.y+top.translation.y)/2, 
-									(bottom.translation.z + top.translation.z)/2);
-				
+						(bottom.translation.y+top.translation.y)/2, 
+						(bottom.translation.z + top.translation.z)/2);
+
 				this.setScaling((bottom.scaling.x+top.scaling.x)/2,
-								(bottom.scaling.y+top.scaling.y)/2,
-								(bottom.scaling.z+top.scaling.z)/2);					
-			}
-			else{
-				System.out.println ("FAILURE OF THE 2nd KIND");
+						(bottom.scaling.y+top.scaling.y)/2,
+						(bottom.scaling.z+top.scaling.z)/2);					
 			}
 
 		}
 
-	
+
 
 		//Get list of all the frames
 		//Search to see where the current frame is relative to all the frames
