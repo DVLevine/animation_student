@@ -18,9 +18,12 @@ uniform vec3 un_LightAmbientIntensity;
 // How far the object's surface should be displaced (in eye space)
 uniform float displaceScale;
 
+varying vec3 ex_Normal;
+varying vec4 ex_EyeSpacePosition;
+
 void main()
 {
 	// TODO: (Shaders 1 Problem 1) Implement the fragment shader for
 	// the toon displacement shader here
-    gl_FragColor = vec4(1, 0, 0, 1);
+    gl_FragColor = vec4(vec3(0.0,0.0,0.0), 1.0f);
 }

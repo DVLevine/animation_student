@@ -21,9 +21,18 @@ uniform float displaceScale;
 attribute vec3 in_Vertex;
 attribute vec3 in_Normal;
 
+varying vec3 ex_Normal;
+varying vec4 ex_EyeSpacePosition;
+
 void main()
 {
 	// TODO: (Shaders 1 Problem 1) Implement the vertex shader for
 	// the toon displacement shader here
-    gl_Position = un_Projection * un_ModelView * vec4(in_Vertex, 1);
+    ex_Normal = normalize(un_NormalMatrix *in_Normal);
+	
+	ex_EyeSpacePosition = un_ModelView * vec4(in_Vertex, 1.0);
+	
+	vec3 binga = ex_EyeSpacePosition.xyz + ex_Normal*displaceScale;
+	
+	gl_Position = un_Projection * vec4(binga,1);
 }

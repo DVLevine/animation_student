@@ -106,17 +106,17 @@ import cs4620.ui.TreeRenderer;
 class HouseAnimatorP3 extends SceneTraverser
 {
 	float time;
-	
+
 	public HouseAnimatorP3()
 	{
 		time = 0.0f;
 	}
-	
+
 	public void setTime(float time)
 	{
 		this.time = time;
 	}
-	
+
 	public void buildInitialScene(GL2 gl, Scene scene)
 	{
 		try {
@@ -143,23 +143,36 @@ class HouseAnimatorP3 extends SceneTraverser
 class SolarSystemAnimatorP3 extends SceneTraverser
 {
 	float time;
-	
-	
+
+
 	public SolarSystemAnimatorP3()
 	{
 		time = 0.0f;
 	}
-	
+
 	public void setTime(float time)
 	{
 		this.time = time;
 	}
-	
+
 	public void buildInitialScene(GL2 gl, Scene scene)
 	{
 		// TODO (Manipulators P3): Initialize scene by loading your solar system from Problem 2.
+
+		try {
+			scene.load(gl, "data/scenes/manip/solar_system.txt");
+		} 
+		catch (Exception e) {
+			if (e instanceof IOException) {
+				System.err.println("FAIL: loading solar system scene");
+				e.printStackTrace();
+			}
+			else {
+				System.out.println("Error in solar system build initial scene: " + e);
+			}
+		}
 	}
-	
+
 
 	@Override
 	public void traverseNode(SceneNode node, Matrix4f toEye) {
@@ -167,12 +180,49 @@ class SolarSystemAnimatorP3 extends SceneTraverser
 		// Update the scene given the current time
 		// in this.time. This method will be called once per node in the scene
 		// to update the whole scene.
-		
+
+		String nodeName = node.getName();
+
+		if (nodeName.equals("Earth"))
+		{
+			node.rotation.y = (float) (8 * time);
+		}
+		else if (nodeName.equals("Moon"))
+		{
+			node.rotation.y = (float) (10 * time);
+		}
+		else if (nodeName.equals("Mars"))
+		{
+			node.rotation.y = (float) (8 * time);
+		}
+		else if (nodeName.equals("NEarth"))
+		{
+			node.rotation.y = (float) (4 * time);	// one year = 90s
+		}
+		else if (nodeName.equals("NMars"))
+		{
+			node.rotation.y = (float) (2 * time);	// one year = 180s
+		}
+		else if (nodeName.equals("NMoon"))
+		{
+			node.rotation.y = (float) (4 * time);
+		}
+
 		// TODO: PPA2 Problem 3, Section 5.3: For spline nodes, set the node
 		// time, and use the calculated spline offset to update the child nodes.
 		// Note that the time for the solar system is set between 0 and 360, but for splines
 		// it works better to normalize it to [0, 1].
-		
+		else if (node instanceof SplineNode) {
+			SplineNode sNode = (SplineNode) node;
+
+			float normalizedTime = time/360;
+			sNode.setTime(normalizedTime);
+
+			Vector3f offset = sNode.splineOffset;
+			for (int i = 0; i < sNode.getChildCount(); i++) {
+				sNode.getSceneNodeChild(i).setTranslation(offset.x, offset.y, offset.z);
+			}
+		}
 	}
 }
 
@@ -186,7 +236,7 @@ class SolarSystemAnimatorP3 extends SceneTraverser
  * @author pramook, arbree
  */
 public class SplinesP3 extends JFrame implements GLPickingDrawer,
-	ChangeListener, ActionListener, TreeSelectionListener
+ChangeListener, ActionListener, TreeSelectionListener
 
 {
 	private static final long serialVersionUID = 1L;
@@ -213,12 +263,12 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 	public static final String ADD_TEAPOT_MENU_TEXT = "Add Teapot";
 	private static final String ADD_SPLINE_MENU_TEXT = "Add Spline";
 	private static final String ADD_SPLINEVOL_MENU_TEXT = "Add Spline Volume";
-    private static final String RESET_POINTS_TEXT = "Reset";
-    private static final String DELETE_SELECTED_TEXT = "Delete Selected";
-    private static final String REBUILD_MESH_TEXT = "Rebuild Mesh";
-    private static final String ADD_POINT_TEXT = "Add Control Point";
-    
-    private static final String SHADER_COMBO_BOX_COMMAND = "shaderComboBoxCommand";
+	private static final String RESET_POINTS_TEXT = "Reset";
+	private static final String DELETE_SELECTED_TEXT = "Delete Selected";
+	private static final String REBUILD_MESH_TEXT = "Rebuild Mesh";
+	private static final String ADD_POINT_TEXT = "Add Control Point";
+
+	private static final String SHADER_COMBO_BOX_COMMAND = "shaderComboBoxCommand";
 	private static final String GREEN_SHADER_TEXT = "Green Shader";
 	private static final String NORMAL_SHADER_TEXT = "Normal Shader";
 	private static final String BLINN_PHONG_TEXT = "Blinn-Phong Shader";
@@ -251,7 +301,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 	SpeedSettingPanel speedSettingPanel;
 	JPanel nodeSettingPanel;
 	JComboBox shaderComboBox;
-	
+
 	TranslateManip translateManip;
 	RotateManip rotateManip;
 	ScaleManip scaleManip;
@@ -260,25 +310,25 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 	boolean isManipulatingManip;
 
 	Scene scene;
-	
+
 	Scene solarSystemScene;
 	Scene houseScene;
 	SolarSystemAnimatorP3 solarSystemAnimator;
 	HouseAnimatorP3 houseAnimator;
-	
+
 	// GL resources
 	SceneProgram flatColorProgram;
 	PickingSceneProgram pickingProgram;
-	
+
 	boolean sliderChanged = true;
 
 	boolean drawForPicking = false;
 	SceneNode[] nodesToReparent = null;
 	boolean isReparenting = false;
-	
+
 	protected boolean initialized = false;
 	boolean shadersInitialized = false;
-	
+
 	JPanel optionPanel;
 	ButtonGroup windowModeButtonGroup;
 	JRadioButton fourViewRadioButton;
@@ -288,11 +338,11 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 	JCheckBox wireframeCheckBox;
 	JCheckBox lightingCheckBox;
 	JCheckBox normalsCheckBox;
-	
-    private float[] ambient = new float[] { 0.1f, 0.1f, 0.1f, 0.1f };
-    private float[] diffuse = new float[] { 0.8f, 0.8f, 0.0f, 0.0f };
-    private float[] specular = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
-    private float shininess = 50.0f;
+
+	private float[] ambient = new float[] { 0.1f, 0.1f, 0.1f, 0.1f };
+	private float[] diffuse = new float[] { 0.8f, 0.8f, 0.0f, 0.0f };
+	private float[] specular = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+	private float shininess = 50.0f;
 
 	public SplinesP3() {
 		super("CS 4621 Splines Assignment / Problem 3");
@@ -302,7 +352,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 				terminate();
 			}
 		});
-		
+
 		toleranceSliderPanel = new ToleranceSliderPanel(this);
 		epsilonSliderPanel = new ToleranceSliderPanel(0.4f, -3.0f, -0.25f, this);
 		timeSliderPanel = new SliderPanel(this, 0.0f, 360.0f, 0.0f, false, 360, "0");
@@ -360,12 +410,12 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		BasicAction saveAs = new BasicAction(SAVE_AS_MENU_TEXT, this);
 		BasicAction open = new BasicAction(OPEN_MENU_TEXT, this);
 		BasicAction exit = new BasicAction(EXIT_MENU_TEXT, this);
-		
+
 		BasicAction addPoint = new BasicAction(ADD_POINT_TEXT, this);
-        BasicAction deleteSelected = new BasicAction(DELETE_SELECTED_TEXT, this);
-        BasicAction reset = new BasicAction(RESET_POINTS_TEXT, this);
-        BasicAction rebuildMesh = new BasicAction(REBUILD_MESH_TEXT, this);
-		
+		BasicAction deleteSelected = new BasicAction(DELETE_SELECTED_TEXT, this);
+		BasicAction reset = new BasicAction(RESET_POINTS_TEXT, this);
+		BasicAction rebuildMesh = new BasicAction(REBUILD_MESH_TEXT, this);
+
 		BasicAction pickTool = new BasicAction(PICK_MENU_TEXT, this);
 		BasicAction rotateTool = new BasicAction(ROTATE_MENU_TEXT, this);
 		BasicAction translateTool = new BasicAction(TRANSLATE_MENU_TEXT, this);
@@ -375,7 +425,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		group.setAcceleratorKey(KeyEvent.VK_G, KeyEvent.CTRL_MASK);
 		reparent.setAcceleratorKey(KeyEvent.VK_R, KeyEvent.CTRL_MASK);
 		delete.setAcceleratorKey(KeyEvent.VK_DELETE, 0);
-		
+
 		pickTool.setAcceleratorKey(KeyEvent.VK_Q, KeyEvent.CTRL_MASK | KeyEvent.SHIFT_DOWN_MASK);
 		translateTool.setAcceleratorKey(KeyEvent.VK_W, KeyEvent.CTRL_MASK | KeyEvent.SHIFT_DOWN_MASK);
 		rotateTool.setAcceleratorKey(KeyEvent.VK_E, KeyEvent.CTRL_MASK | KeyEvent.SHIFT_DOWN_MASK);
@@ -408,15 +458,15 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		menu.add(new JMenuItem(rotateTool));
 		menu.add(new JMenuItem(scaleTool));
 		bar.add(menu);
-		
+
 		menu = new JMenu("Action");
 		menu.setMnemonic('A');
 		menu.add(new JMenuItem(addPoint));
-        menu.add(new JMenuItem(deleteSelected));
-        menu.add(new JMenuItem(reset));
-        menu.addSeparator();
-        menu.add(new JMenuItem(rebuildMesh));
-        bar.add(menu);
+		menu.add(new JMenuItem(deleteSelected));
+		menu.add(new JMenuItem(reset));
+		menu.addSeparator();
+		menu.add(new JMenuItem(rebuildMesh));
+		bar.add(menu);
 
 		menu = new JMenu("Scene");
 		menu.setMnemonic('S');
@@ -453,7 +503,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		treeView.addMouseListener(new PopupListener(p));
 		treeView.addTreeSelectionListener(this);
 	}
-	
+
 	private void initOptionPane()
 	{
 		optionPanel = new JPanel();
@@ -466,16 +516,16 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		windowModeButtonGroup = new ButtonGroup();
 
 		oneViewRadioButton = new JRadioButton("1 View", false);
-	    radioButtonPanel.add(oneViewRadioButton);
-	    oneViewRadioButton.addActionListener(this);
-	    windowModeButtonGroup.add(oneViewRadioButton);
+		radioButtonPanel.add(oneViewRadioButton);
+		oneViewRadioButton.addActionListener(this);
+		windowModeButtonGroup.add(oneViewRadioButton);
 
-	    fourViewRadioButton = new JRadioButton("4 Views", true);
-	    radioButtonPanel.add(fourViewRadioButton);
-	    fourViewRadioButton.addActionListener(this);
-	    windowModeButtonGroup.add(fourViewRadioButton);
+		fourViewRadioButton = new JRadioButton("4 Views", true);
+		radioButtonPanel.add(fourViewRadioButton);
+		fourViewRadioButton.addActionListener(this);
+		windowModeButtonGroup.add(fourViewRadioButton);
 
-	    displayModePanel.add(radioButtonPanel, BorderLayout.LINE_START);
+		displayModePanel.add(radioButtonPanel, BorderLayout.LINE_START);
 
 		displayModePanel.setLayout(new FlowLayout());
 		optionPanel.add(displayModePanel, BorderLayout.LINE_END);
@@ -484,7 +534,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		interactiveCheckBox.setSelected(true);
 		interactiveCheckBox.addActionListener(this);
 		displayModePanel.add(interactiveCheckBox);
-		
+
 		wireframeCheckBox = new JCheckBox("Wireframe");
 		wireframeCheckBox.setSelected(false);
 		wireframeCheckBox.addActionListener(this);
@@ -494,7 +544,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		lightingCheckBox.setSelected(true);
 		lightingCheckBox.addActionListener(this);
 		displayModePanel.add(lightingCheckBox);
-		
+
 		normalsCheckBox = new JCheckBox("Normals");
 		normalsCheckBox.setSelected(true);
 		normalsCheckBox.addActionListener(this);
@@ -527,19 +577,19 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 
 		nodeSettingPanel = new JPanel();
 		nodeSettingPanel.setLayout(new TableLayout(new double[][] {
-			{
-				TableLayout.FILL
-			},
-			{
-				TableLayout.MINIMUM,
-				TableLayout.MINIMUM,
-				TableLayout.MINIMUM,
-				TableLayout.MINIMUM,
-				TableLayout.MINIMUM
-			}
+				{
+					TableLayout.FILL
+				},
+				{
+					TableLayout.MINIMUM,
+					TableLayout.MINIMUM,
+					TableLayout.MINIMUM,
+					TableLayout.MINIMUM,
+					TableLayout.MINIMUM
+				}
 		}));
 		leftSplitPane.setBottomComponent(nodeSettingPanel);
-		
+
 		nameSettingPanel = new NameSettingPanel();
 		//nodeSettingPanel.add(nameSettingPanel, "0,0,0,0");
 		//nameSettingPanel.setVisible(false);
@@ -555,10 +605,10 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		materialPanel = diffuseMaterialPanel;
 		//nodeSettingPanel.add(phongMaterialPanel, "0,1,0,1");
 		//phongMaterialPanel.setVisible(false);
-		
+
 		shaderComboBox = new JComboBox();
 		shaderComboBox.setActionCommand(SHADER_COMBO_BOX_COMMAND);
-		
+
 		shaderComboBox.addItem(GREEN_SHADER_TEXT);
 		shaderComboBox.addItem(NORMAL_SHADER_TEXT);
 		shaderComboBox.addItem(BLINN_PHONG_TEXT);
@@ -570,9 +620,9 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		shaderComboBox.addItem(MARS_SHADER_TEXT);
 		shaderComboBox.addItem(MOON_SHADER_TEXT);
 		shaderComboBox.addItem(COMET_SHADER_TEXT);
-		
+
 		shaderComboBox.addActionListener(this);
-		
+
 		speedSettingPanel = new SpeedSettingPanel();
 
 		lightSettingPanel = new LightSettingPanel();
@@ -583,7 +633,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		leftSplitPane.setOneTouchExpandable(true);
 		leftSplitPane.setResizeWeight(0.95);
 		leftSplitPane.setMinimumSize(new Dimension(300, leftSplitPane.getMinimumSize().height));
-		
+
 		mainSplitPane.resetToPreferredSizes();
 		nodeSettingPanel.removeAll();
 		leftSplitPane.resetToPreferredSizes();
@@ -604,7 +654,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		for (int i=0; i<kls.length; i++)
 			treeView.removeKeyListener(kls[i]);
 	}
-	
+
 	private void initManip()
 	{
 		translateManip = new TranslateManip();
@@ -619,7 +669,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		showManip = false;
 		isManipulatingManip = false;
 	}
-	
+
 	private float getEpsilon() {
 		return epsilonSliderPanel.getTolerance();
 	}
@@ -628,16 +678,16 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 	{
 		return toleranceSliderPanel.getTolerance();
 	}
-	
+
 	private float getTime()
 	{
 		return timeSliderPanel.getValue();
 	}
-	
+
 	protected void initShaders(GL2 gl) {
 		if(shadersInitialized)
 			return;
-		
+
 		try {
 			flatColorProgram = new SceneProgram(gl, "flatcolor.vs", "flatcolor.fs");
 			pickingProgram = new PickingSceneProgram(gl, "picking.vs", "picking.fs");
@@ -646,26 +696,26 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 			e.printStackTrace();
 			System.exit(1);
 		}
-		
+
 		shadersInitialized = true;
 	}
 
 	public void init(GLAutoDrawable drawable, CameraController cameraController) {
 		if(initialized)
 			return;
-		
+
 		final GL2 gl = drawable.getGL().getGL2();
-		
+
 		solarSystemScene = new Scene(gl);
 		houseScene = new Scene(gl);
 		solarSystemAnimator = new SolarSystemAnimatorP3();
 		solarSystemAnimator.buildInitialScene(gl, solarSystemScene);
 		houseAnimator = new HouseAnimatorP3();
 		houseAnimator.buildInitialScene(gl, houseScene);
-		
+
 		scene = solarSystemScene;
 		treeView.setModel(scene.getTreeModel());
-		
+
 		rotateManip.setScene(scene);
 		scaleManip.setScene(scene);
 		translateManip.setScene(scene);
@@ -691,7 +741,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		gl.glFrontFace(GL2.GL_CCW);
 
 		gl.glHint(GL2.GL_PERSPECTIVE_CORRECTION_HINT, GL2.GL_NICEST);
-		
+
 		splineDrawer.init(drawable, cameraController);
 		splineDrawer.setTolerance(getTolerance());
 		splineDrawer.setEpsilon(getEpsilon());
@@ -702,23 +752,23 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		rebuildMeshes(gl);
 		animateScene();
 		splinePanel.startAnimation();
-		
+
 		initialized = true;
 	}
 
 	protected void setProjectionAndLighting(GL2 gl, SceneProgram program, CameraController cameraController)
 	{
 		program.setProjection(gl, cameraController.getProjection());
-		
+
 		// give program info about all lights in the scene
 		scene.setupLighting(gl, program, cameraController.getView());
 		program.setLightAmbientIntensity(gl, lightSettingPanel.getAmbient());
 	}
-	
+
 	protected ProgramInfo constructProgramInfo(GL2 gl, CameraController cameraController)
 	{
 		ProgramInfo info = new ProgramInfo();
-		
+
 		info.un_Projection = cameraController.getProjection();
 		scene.getLightingInfo(gl, info, cameraController.getView());
 		info.un_LightAmbientIntensity = lightSettingPanel.getAmbient();
@@ -728,18 +778,18 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 	public void draw(GLAutoDrawable drawable, CameraController cameraController)
 	{
 		final GL2 gl = drawable.getGL().getGL2();
-		
+
 		gl.glEnable(GL2.GL_FRAMEBUFFER_SRGB);
-		
+
 		rebuildMeshes(gl);
 
 		if (!lightingCheckBox.isSelected())
 		{
 			// Render with flatColorProgram
 			Program.use(gl, flatColorProgram);
-			
+
 			setProjectionAndLighting(gl, flatColorProgram, cameraController);
-			
+
 			if (wireframeCheckBox.isSelected())
 			{
 				scene.renderWireframeWithProgram(gl, flatColorProgram, cameraController.getView());
@@ -748,7 +798,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 			{
 				scene.renderWithProgram(gl, flatColorProgram, cameraController.getView());
 			}
-			
+
 			Program.unuse(gl);
 		}
 		else
@@ -756,7 +806,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 			// Let each node use its own material
 			// Get ProgramInfo to use
 			ProgramInfo info = constructProgramInfo(gl, cameraController);
-			
+
 			if (wireframeCheckBox.isSelected())
 			{
 				scene.renderWireframe(gl, info, cameraController.getView());
@@ -766,17 +816,17 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 				scene.render(gl, info, cameraController.getView());
 			}
 		}
-		
+
 		if (showManip && currentManip != null)
 		{
 			Program.use(gl, flatColorProgram);
 			setProjectionAndLighting(gl, flatColorProgram, cameraController);
-			
+
 			currentManip.renderConstantSize(gl, flatColorProgram, cameraController.getCamera());
 		}
-		
+
 		Program.unuse(gl);
-		
+
 		gl.glDisable(GL2.GL_FRAMEBUFFER_SRGB);
 	}
 
@@ -813,7 +863,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 			sliderChanged = false;
 		}
 	}
-	
+
 	protected void animateScene()
 	{
 		houseAnimator.setTime(getTime());
@@ -853,19 +903,19 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		refresh();
 	}
 
-//	/**
-//	 * Displays an exception in a window
-//	 * @param e
-//	 */
-//	protected void showExceptionDialog(Exception e)
-//	{
-//		String str = "The following exception was thrown: " + e.toString() + ".\n\n" + "Would you like to see the stack trace?";
-//		int choice = JOptionPane.showConfirmDialog(this, str, "Exception Thrown", JOptionPane.YES_NO_OPTION);
-//
-//		if (choice == JOptionPane.YES_OPTION) {
-//			e.printStackTrace();
-//		}
-//	}
+	//	/**
+	//	 * Displays an exception in a window
+	//	 * @param e
+	//	 */
+	//	protected void showExceptionDialog(Exception e)
+	//	{
+	//		String str = "The following exception was thrown: " + e.toString() + ".\n\n" + "Would you like to see the stack trace?";
+	//		int choice = JOptionPane.showConfirmDialog(this, str, "Exception Thrown", JOptionPane.YES_NO_OPTION);
+	//
+	//		if (choice == JOptionPane.YES_OPTION) {
+	//			e.printStackTrace();
+	//		}
+	//	}
 
 	/**
 	 * Loads a tree stored in a file
@@ -887,7 +937,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		//Update the window
 		refresh();
 	}
-	
+
 	/**
 	 * Switches to a new animated scene
 	 */
@@ -896,28 +946,28 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		scene = newScene;
 		sliderChanged = true;
 		rebuildMeshes(gl);
-		
+
 		treeView.setModel(scene.getTreeModel());
 		animateScene();
 
 		//Update the window
 		refresh();
 	}
-	
+
 	protected void addNewShape(Mesh mesh, String name)
 	{
 		TreePath path = treeView.getSelectionPath();
-		
+
 		try
 		{
 			if (mesh instanceof Spline)
 			{
 				PhongMaterial mat = new PhongMaterial();
-		        mat.setAmbient(ambient[0], ambient[1], ambient[2]);
-		        mat.setDiffuse(diffuse[0], diffuse[1], diffuse[2]);
-		        mat.setSpecular(specular[0], specular[1], specular[2]);
-		        mat.setShininess(shininess);
-		        
+				mat.setAmbient(ambient[0], ambient[1], ambient[2]);
+				mat.setDiffuse(diffuse[0], diffuse[1], diffuse[2]);
+				mat.setSpecular(specular[0], specular[1], specular[2]);
+				mat.setShininess(shininess);
+
 				scene.addNewSpline(path, (Spline)mesh, name, mat);
 			}
 			else
@@ -950,16 +1000,16 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		if (e.getSource() == fourViewRadioButton || e.getSource() == oneViewRadioButton) {
 			splinePanel.setShowFour(fourViewRadioButton.isSelected());
 			return;
-    	}
-    	else if (e.getSource() == interactiveCheckBox) {
-    		splineDrawer.setInteractive(interactiveCheckBox.isSelected());
-    		return;
-    	}
-    	else if (e.getSource() == normalsCheckBox) {
-    		splineDrawer.setNormals(normalsCheckBox.isSelected());
-    		return;
-    	}
-		
+		}
+		else if (e.getSource() == interactiveCheckBox) {
+			splineDrawer.setInteractive(interactiveCheckBox.isSelected());
+			return;
+		}
+		else if (e.getSource() == normalsCheckBox) {
+			splineDrawer.setNormals(normalsCheckBox.isSelected());
+			return;
+		}
+
 		String cmd = e.getActionCommand();
 		String filename = null;
 		if (cmd != null && cmd.equals(SAVE_AS_MENU_TEXT)) {
@@ -982,18 +1032,18 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 			}
 			filename = fileChooser.getSelectedFile().getAbsolutePath();
 		}
-		
+
 		// queue up this action for right after the next display()
 		ActionPerformedSplinesP3Runnable runnable = new ActionPerformedSplinesP3Runnable(this, e, filename);
 		splinePanel.invoke(false, runnable);
 	}
-	
+
 	/**
 	 * A deferred version of actionPerformed, called with the appropriate
 	 * GL context just after a display() has happened and while the running
 	 * thread is guaranteed not to run concurrently with any GL commands
 	 */
-	
+
 	public void processAction(GL2 gl, ActionEvent e, String filename)
 	{
 		String cmd = e.getActionCommand();
@@ -1095,36 +1145,36 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 			terminate();
 		}
 		else if (cmd.equals(RESET_POINTS_TEXT)) {
-            splineDrawer.initControlPoints();
-        }
-        else if (cmd.equals(DELETE_SELECTED_TEXT)) {
-            splineDrawer.deleteControlPoint();
-        }
-        else if (cmd.equals(REBUILD_MESH_TEXT)) {
-            splineDrawer.setRebuildNeeded();
-            splineDrawer.setRebuildMeshNeeded();
-        }
-        else if (cmd.equals(ADD_POINT_TEXT)) {
-            splineDrawer.addControlPoint();
-        }
-        else if (cmd.equals(SHADER_COMBO_BOX_COMMAND))
+			splineDrawer.initControlPoints();
+		}
+		else if (cmd.equals(DELETE_SELECTED_TEXT)) {
+			splineDrawer.deleteControlPoint();
+		}
+		else if (cmd.equals(REBUILD_MESH_TEXT)) {
+			splineDrawer.setRebuildNeeded();
+			splineDrawer.setRebuildMeshNeeded();
+		}
+		else if (cmd.equals(ADD_POINT_TEXT)) {
+			splineDrawer.addControlPoint();
+		}
+		else if (cmd.equals(SHADER_COMBO_BOX_COMMAND))
 		{
 			// get current node
 			SceneNode [] nodes = getSelection();
 			String selectedShader = (String) shaderComboBox.getSelectedItem();
-			
+
 			if(nodes[0] instanceof MeshNode)
 			{
 				MeshNode meshNode = (MeshNode) nodes[0];
 				Material meshMaterial = meshNode.getMaterial();
 				boolean changedMaterial = false;
-				
+
 				PhongMaterial newLightableMaterial = null;
-				
+
 				if(selectedShader.equals(BLINN_PHONG_TEXT) && (!(meshMaterial instanceof PhongMaterial) ||
-															   (meshMaterial instanceof ToonMaterial) ||
-															   (meshMaterial instanceof DiffuseMaterial) ||
-															   (meshMaterial instanceof TextureMaterial)))
+						(meshMaterial instanceof ToonMaterial) ||
+						(meshMaterial instanceof DiffuseMaterial) ||
+						(meshMaterial instanceof TextureMaterial)))
 				{
 					newLightableMaterial = new PhongMaterial();
 					newLightableMaterial.setDiffuse(1f, 1f, 1f);
@@ -1141,7 +1191,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 					meshNode.setMaterial(new NormalMaterial());
 					changedMaterial = true;
 				}
-				
+
 				else if(selectedShader.equals(TOON_SHADER_TEXT) && !(meshMaterial instanceof ToonMaterial))
 				{
 					newLightableMaterial = new ToonMaterial();
@@ -1194,7 +1244,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 					meshNode.setMaterial(newLightableMaterial);
 					changedMaterial = true;
 				}
-				
+
 				if(changedMaterial)
 				{
 					if(meshMaterial instanceof PhongMaterial && newLightableMaterial != null)
@@ -1211,7 +1261,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 			}
 		}
 	}
-	
+
 	@Override
 	public void valueChanged(TreeSelectionEvent e)
 	{
@@ -1226,7 +1276,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 			scene.reparent(nodesToReparent, parent);
 			isReparenting = false;
 		}
-		
+
 		showManip = selection.length == 1;
 		if (showManip && currentManip != null)
 		{
@@ -1234,7 +1284,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		}
 
 		showHideSettingPanels(selection);
-		
+
 		splineDrawer.setCurve(null);
 		splineDrawer.setMesh(null);
 
@@ -1255,7 +1305,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 				splineDrawer.setMesh(spline.getMesh());
 			}
 		}
-		
+
 		refresh();
 	}
 
@@ -1267,10 +1317,10 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 			SceneNode node = selection[0];
 
 			int visibleCount = 0;
-			
+
 			nameSettingPanel.setNode(node);
 			nameSettingPanel.setVisible(true);
-			
+
 			nodeSettingPanel.add(nameSettingPanel, "0,"+Integer.toString(visibleCount)+",0,"+Integer.toString(visibleCount));
 			visibleCount += 1;
 
@@ -1279,7 +1329,7 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 
 			nodeSettingPanel.add(transformSettingPanel, "0,"+Integer.toString(visibleCount)+",0,"+Integer.toString(visibleCount));
 			visibleCount += 1;
-			
+
 			if (node instanceof SplineNode)
 			{
 				SplineNode splineNode = (SplineNode)node;
@@ -1294,9 +1344,9 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 			if (node instanceof MeshNode)
 			{
 				MeshNode meshNode = (MeshNode)node;
-				
+
 				Material mat = meshNode.getMaterial();
-				
+
 				if(mat instanceof DiffuseMaterial)
 				{
 					shaderComboBox.setSelectedItem(DIFFUSE_SHADER_TEXT);
@@ -1376,13 +1426,13 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 					shaderComboBox.setVisible(false);
 					materialPanel.setVisible(false);
 				}
-				
+
 				if(shaderComboBox.isVisible())
 				{
 					nodeSettingPanel.add(shaderComboBox, "0,"+Integer.toString(visibleCount)+",0,"+Integer.toString(visibleCount));
 					visibleCount += 1;
 				}
-				
+
 				if(materialPanel.isVisible())
 				{
 					materialPanel.setMaterial(mat);
@@ -1444,18 +1494,18 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 	public void drawPicking(GLAutoDrawable drawable, CameraController controller) {
 		final GL2 gl = drawable.getGL().getGL2();
 		rebuildMeshes(gl);
-		
+
 		Program.use(gl, pickingProgram);
-		
+
 		setProjectionAndLighting(gl, pickingProgram, controller);
 
 		scene.renderPicking(gl, pickingProgram, controller.getView());
-		
+
 		if (showManip && currentManip != null)
 		{
 			currentManip.renderConstantSize(gl, pickingProgram, controller.getCamera());
 		}
-		
+
 		Program.unuse(gl);
 	}
 
@@ -1467,13 +1517,13 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
 		{
 			treeView.setSelectionPath(new TreePath(node.getPath()));
 		}
-		
+
 		// notify active manipulator if selected
 		isManipulatingManip = false;
 		if (pickedId == Manip.PICK_CENTER ||
-		    pickedId == Manip.PICK_X ||
-		    pickedId == Manip.PICK_Y ||
-		    pickedId == Manip.PICK_Z)
+				pickedId == Manip.PICK_X ||
+				pickedId == Manip.PICK_Y ||
+				pickedId == Manip.PICK_Z)
 		{
 			if (currentManip != null)
 			{
@@ -1490,18 +1540,18 @@ public class SplinesP3 extends JFrame implements GLPickingDrawer,
  */
 
 class ActionPerformedSplinesP3Runnable implements GLRunnable {
-	
+
 	SplinesP3 problem;
 	ActionEvent e;
 	String filename;
-	
+
 	public ActionPerformedSplinesP3Runnable(SplinesP3 problem, ActionEvent e)
 	{
 		this.problem = problem;
 		this.e = e;
 		this.filename = null;
 	}
-	
+
 	public ActionPerformedSplinesP3Runnable(SplinesP3 problem, ActionEvent e, String filename)
 	{
 		this.problem = problem;
@@ -1512,10 +1562,10 @@ class ActionPerformedSplinesP3Runnable implements GLRunnable {
 	@Override
 	public boolean run(GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
-		
+
 		problem.processAction(gl, e, filename);
-		
+
 		return true;
 	}
-	
+
 }

@@ -19,11 +19,17 @@ attribute vec3 in_Vertex;
 attribute vec3 in_Normal;
 
 // TODO: (Shaders 1 Problem 1) Add any varying variables here
+varying vec3 ex_Normal;
+varying vec4 ex_EyeSpacePosition;
 
 void main(void)
 {
 	// TODO: (Shaders 1 Problem 1) Implement the vertex shader for per-pixel
 	// Blinn-Phong here
-	gl_Position = un_Projection * un_ModelView * vec4(in_Vertex, 1);
+	
+	ex_Normal = normalize(un_NormalMatrix * in_Normal);
+
+	ex_EyeSpacePosition = un_ModelView * vec4(in_Vertex, 1.0);
+	gl_Position = un_Projection * ex_EyeSpacePosition;
 }
 

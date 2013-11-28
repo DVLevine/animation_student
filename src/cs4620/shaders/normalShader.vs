@@ -19,10 +19,14 @@ attribute vec3 in_Vertex;
 attribute vec3 in_Normal;
 
 // TODO: (Shaders 1 Problem 1) Declare any varying variables here
+varying vec3 bibom;
 
 void main()
 {
 	// TODO: (Shaders 1 Problem 1) Implement the vertex shader for the
 	// normal shader here
+	
+    bibom = in_Normal;
+    
     gl_Position = un_Projection * un_ModelView * vec4(in_Vertex, 1);
 }

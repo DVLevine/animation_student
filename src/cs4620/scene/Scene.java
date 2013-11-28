@@ -100,6 +100,16 @@ public class Scene
 		//   The Transforms class (cs4620.framework) contains basic transformation matrices.
 		// * Use traverser.traverseNode() to traverse this node with nextTransform.
 		// * Recursively traverse the tree.
+		nextTransform.mul(Transforms.translate3DH(node.translation.x, node.translation.y, node.translation.z));
+		nextTransform.mul(Transforms.rotateAxis3DH(2,node.rotation.z));
+		nextTransform.mul(Transforms.rotateAxis3DH(1,node.rotation.y));
+		nextTransform.mul(Transforms.rotateAxis3DH(0,node.rotation.x));
+		nextTransform.mul(Transforms.scale3DH(node.scaling.x, node.scaling.y, node.scaling.z));
+		traverser.traverseNode(node, nextTransform);
+		
+		for (int i = 0; i < node.getChildCount(); i++) {
+			traverseHelper(traverser, node.getSceneNodeChild(i), nextTransform);
+		}
 	}
 
 	public void rebuildMeshes(GL2 gl, float tolerance, float epsilon)
