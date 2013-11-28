@@ -32,6 +32,8 @@ public class FlowerMaterial extends PhongMaterial {
 	
 	// TODO: (Shaders 1 Problem 2) Declare any other variables you want to pass as
 	// uniforms to your vertex shader here
+	private float phi;
+	private float radius;
 	
 	public FlowerMaterial()
 	{
@@ -84,6 +86,9 @@ public class FlowerMaterial extends PhongMaterial {
 			
 			// TODO: (Shaders 1 Problem 2) use L_x and L_y to calculate any other uniforms you
 			// want to send to the vertex shader
+			float phi = (float) Math.PI / 2 - theta;
+			this.phi = phi;
+			this.radius = height / phi;
 		}
 	}
 
@@ -122,6 +127,12 @@ public class FlowerMaterial extends PhongMaterial {
 				flowerProgram.getUniform("un_ObjToFrame").setMatrix4(gl, objToFrame);
 			
 			// TODO: (Shaders 1 Problem 2) Send any custom uniforms here
+			if(flowerProgram.getUniform("un_FlowerHeight") != null)
+				flowerProgram.getUniform("un_FlowerHeight").set1Float(gl, flowerHeight);
+			if(flowerProgram.getUniform("un_Phi") != null)
+				flowerProgram.getUniform("un_Phi").set1Float(gl, phi);
+			if(flowerProgram.getUniform("un_Radius") != null)
+				flowerProgram.getUniform("un_Radius").set1Float(gl, radius);
 			
 			if(wireframe) {
 				mesh.drawWireframe(gl);

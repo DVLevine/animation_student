@@ -63,6 +63,8 @@ public class ToonMaterial extends PhongMaterial {
 		// Store the previously used program
 		Program p = Program.swap(gl,  displaceProgram);
 		
+		gl.glCullFace(GL2.GL_FRONT);
+		
 		displaceProgram.setAllInfo(gl, info);
 		
 		displaceProgram.setAmbientColor(gl, new Vector3f( ambient[0],  ambient[1],  ambient[2]));
@@ -76,8 +78,10 @@ public class ToonMaterial extends PhongMaterial {
 			System.out.println("Toon displace shader is ignoring uniform \"displaceScale\"");
 		
 		// TODO: (Shaders 1 Problem 1) Add code here to draw using the toon displacement shader
+		this.drawUsingProgram(gl, displaceProgram, mesh, wireframe);
 		
 		// Now use the quantize program
+		gl.glCullFace(GL2.GL_BACK);
 		Program.use(gl, quantizeProgram);
 		
 		quantizeProgram.setAllInfo(gl, info);
