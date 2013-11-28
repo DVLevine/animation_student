@@ -56,30 +56,28 @@ public class SplineNode extends MeshNode {
 		// TODO: PPA2 Problem 3, Section 5.2:
 		// Accounting for speed, do a binary search for time over the 'normalized'
 		// lengths array and set the splineOffset to the closest position in time.
+	    float distance = (speed * t) % 1.0f;
 		
-		float distance = (speed * t) % 1.0f;
-		
-		float[] length_buffer = ((Spline)this.getMesh()).getBspline().getLengthBuffer();
-		float[] vertices = ((Spline)this.getMesh()).getBspline().vertices;
-		
-		int closestTime = Arrays.binarySearch(length_buffer, distance);
-		
-		if (closestTime < 0) {
-			int insert = Math.abs(closestTime) - 1; //the point where the distance would've been inserted
-			if (Math.abs(length_buffer[insert-1] - distance) < Math.abs(length_buffer[insert] - distance)) {
-				closestTime = insert-1;
-			}
-			else {
-				closestTime = insert;
-			}
+	    float[] length_buffer = ((Spline)this.getMesh()).getBspline().getLengthBuffer();
+	    float[] vertices = ((Spline)this.getMesh()).getBspline().vertices;
+	    
+	    int closestTime = Arrays.binarySearch(length_buffer, distance);
+	    
+	    if (closestTime < 0) {
+		int insert = Math.abs(closestTime) - 1; //the point where the distance would've been inserted
+		if (Math.abs(length_buffer[insert-1] - distance) < Math.abs(length_buffer[insert] - distance)) {
+		    closestTime = insert-1;
 		}
-		
-		splineOffset.x = vertices[2*closestTime];
-		splineOffset.y = vertices[2*closestTime+1];
-		splineOffset.z = 0;
-		
+		else {
+			    closestTime = insert;
+		}
+	    }
+	    
+	    splineOffset.x = vertices[2*closestTime];
+	    splineOffset.y = vertices[2*closestTime+1];
+	    splineOffset.z = 0;
 	}
-
+    
 	public static SceneNode fromYamlObject(GL2 gl, Object yamlObject)
 	{
 		if (!(yamlObject instanceof Map))

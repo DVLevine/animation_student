@@ -14,7 +14,7 @@ public abstract class Camera {
 	protected static final Vector3f DEFAULT_UP = new Vector3f(0, 1, 0);
 	protected static final Vector3f VERTICAL = new Vector3f(0,1,0);
 
-  //All the camera parameters
+	//All the camera parameters
 	public float aspect = 1;
 	public float near;
 	public float far;
@@ -89,7 +89,7 @@ public abstract class Camera {
 
 		return up;
 	}
-	
+
 	/**
 	 * Return the view direction
 	 */
@@ -157,27 +157,48 @@ public abstract class Camera {
 		offset.negate();
 		eye.add(target, offset);
 	}
-	
+
 	/**
 	 * Form the projection matrix for this camera
 	 */
 	public abstract Matrix4f getProjection();
-	
+
 	/**
 	 * Form the view matrix for this camera
 	 */
 	public Matrix4f getView() {
 		return Transforms.lookAt3DH(eye, target, up);
 	}
-	
+
 	/**
 	 * Return in p and v a ray with the property that all points along the ray are
 	 * projected down by this camera to the same x,y NDC coordinates specified by ndc.
 	 */
-	
+
 	public void getRayNDC(Vector2f ndc, Vector3f p, Vector3f v)
 	{
 		// TODO (Manipulators P1): Implement this helper method as described in the assignment
 		// description and the comment above.
+
+		Vector4f ndcStart = new Vector4f(ndc.x, ndc.y, -1, 1);
+		Vector4f ndcEnd = new Vector4f(ndc.x, ndc.y, 1, 1);
+		Matrix4f throwback = new Matrix4f();
+
+		// multiple projection and viewing matrices, and take their inverse to transform
+		// from world coordinates to NDC
+		throwback.set(getProjection());
+		throwback.mul(getView());
+
+		throwback.invert();
+
+		throwback.transform(ndcStart);
+		throwback.transform(ndcEnd);
+
+		ndcStart.scale(1.0f/ndcStart.w);
+		ndcEnd.scale(1.0f/ndcEnd.w);
+
+		p.set(ndcStart.x, ndcStart.y, ndcStart.z);
+		ndcEnd.sub(ndcStart);
+		v.set(ndcEnd.x, ndcEnd.y, ndcEnd.z);
 	}
 }

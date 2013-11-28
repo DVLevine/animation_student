@@ -63,18 +63,18 @@ public class SceneNode extends DefaultMutableTreeNode {
 		// node's local coordinates to world space.
 		// WARNING: the handles drawn for the three manipulators will not display properly until
 		// you implement this method.
-		Matrix4f world = Transforms.identity3DH();
-		SceneNode node = this;
-		while (node != null){
-			world.mul(Transforms.scale3DH(node.scaling.x, node.scaling.y, node.scaling.z), world);
-			world.mul(Transforms.rotateAxis3DH(0, node.rotation.x), world);
-			world.mul(Transforms.rotateAxis3DH(1, node.rotation.y), world);
-			world.mul(Transforms.rotateAxis3DH(2, node.rotation.z), world);
-			world.mul(Transforms.translate3DH(node.translation), world);
-			
-			node = node.getSceneNodeParent();
-		}
-		return world;
+	    Matrix4f world = Transforms.identity3DH();
+	    SceneNode node = this;
+	    while (node != null){
+		world.mul(Transforms.scale3DH(node.scaling.x, node.scaling.y, node.scaling.z), world);
+		world.mul(Transforms.rotateAxis3DH(0, node.rotation.x), world);
+		world.mul(Transforms.rotateAxis3DH(1, node.rotation.y), world);
+		world.mul(Transforms.rotateAxis3DH(2, node.rotation.z), world);
+		world.mul(Transforms.translate3DH(node.translation), world);
+		
+		node = node.getSceneNodeParent();
+	    }
+	    return world;
 	}
 	
 	/**
