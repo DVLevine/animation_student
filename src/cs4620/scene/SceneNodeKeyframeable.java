@@ -7,6 +7,7 @@ import java.util.TreeMap;
 import java.util.Map.Entry;
 
 import javax.media.opengl.GL2;
+import javax.vecmath.Matrix4f;
 
 
 public class SceneNodeKeyframeable extends SceneNode
@@ -162,7 +163,84 @@ implements Keyframeable {
 	public void catmullRomInterpolateTo(int frame) {
 		// TODO (Animation P1): Set the state of this node to the specified frame by 
 		// interpolating the states of the appropriate keyframes using Catmull-Rom splines.
+		if (keyframes.containsKey(frame)){
+			SceneNode bing = keyframes.get(frame);
+			this.setTranslation(bing.translation.x, bing.translation.y, bing.translation.z);
+			this.setScaling(bing.scaling.x, bing.scaling.y, bing.scaling.z);
+			return;
+		}
+		else{
+			if (keyframes.ceilingKey(frame)==null && keyframes.floorKey(frame)==null){
+				return;
+			}
+			else if (keyframes.ceilingKey(frame)==null){
+				return;
+			}
+			else if (keyframes.floorKey(frame) == null){
+				return;
+			}
+			else {	
+				int upperBound = keyframes.ceilingKey(frame);
+				int lowerBound = keyframes.floorKey(frame);
+				int topBound;
+				int botBound;
+				//System.out.println(lowerBound+"");
+				//System.out.println(upperBound+ "");
+				if (keyframes.ceilingKey(upperBound) == null){
+					topBound = upperBound;
+				}
+				else{
+					topBound = keyframes.ceilingKey(upperBound);
+				}
+				
+				if (keyframes.ceilingKey(lowerBound) == null){
+					botBound = lowerBound;
+				}
+				else{
+					botBound = keyframes.ceilingKey(lowerBound);
+				}
+				
+				SceneNode ancient = keyframes.get(botBound);
+				SceneNode old = keyframes.get(lowerBound);
+				SceneNode present = keyframes.get(upperBound);
+				SceneNode future = keyframes.get(topBound);
 
+				SceneNode bottom = keyframes.get(lowerBound);
+				SceneNode top = keyframes.get(upperBound);
+
+				//System.out.println(bottom.translation.z+"");
+				//System.out.println(top.translation.z+"");
+
+				float diff = Math.abs(upperBound-lowerBound);
+				float wall = frame - lowerBound;
+				float Tweight = (diff - Math.abs(diff-wall))/diff;
+				float Bweight = (Math.abs(diff-wall))/diff;
+
+				Matrix4f splineMat = new Matrix4f();
+				Vector4f pointVec = new Vector4f();
+				
+				
+				/*System.out.println(""+Tweight);
+				System.out.println(""+Bweight);*/
+
+				this.setTranslation(
+						(Bweight*bottom.translation.x + Tweight*top.translation.x),
+						(Bweight*bottom.translation.y + Tweight*top.translation.y), 
+						(Bweight*bottom.translation.z + Tweight*top.translation.z));
+
+				/*System.out.println("x trans "+this.translation.x);
+				System.out.println("y trans "+this.translation.y);
+				System.out.println("z trans "+this.translation.z);
+				System.out.println("------------------------------------");*/
+
+				this.setScaling(
+						(Bweight*bottom.scaling.x+Tweight*top.scaling.x),
+						(Bweight*bottom.scaling.y+Tweight*top.scaling.y),
+						(Bweight*bottom.scaling.z+Tweight*top.scaling.z));		
+			}	
+		}
+		
+		
 	}
 
 	@Override
