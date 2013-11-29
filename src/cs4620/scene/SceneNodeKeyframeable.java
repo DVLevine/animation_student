@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 
 import javax.media.opengl.GL2;
 import javax.vecmath.Matrix4f;
+import javax.vecmath.Vector4f;
 
 
 public class SceneNodeKeyframeable extends SceneNode
@@ -216,8 +217,12 @@ implements Keyframeable {
 				float Tweight = (diff - Math.abs(diff-wall))/diff;
 				float Bweight = (Math.abs(diff-wall))/diff;
 
-				Matrix4f splineMat = new Matrix4f();
-				Vector4f pointVec = new Vector4f();
+				Matrix4f splineMat = new Matrix4f(0, 2, 0, 0,
+												 -1, 0, 1, 0,
+												  2,-5, 4,-1,
+												 -1, 3,-3, 1);
+				Vector4f pointVec = new Vector4f(botBound,lowerBound,upperBound,topBound);
+				Vector4f timeVec = new Vector4f();
 				
 				
 				/*System.out.println(""+Tweight);
