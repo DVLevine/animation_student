@@ -129,10 +129,10 @@ implements Keyframeable {
 				//System.out.println(bottom.translation.z+"");
 				//System.out.println(top.translation.z+"");
 
-				float diff = Math.abs(upperBound-lowerBound);
-				float wall = frame - lowerBound;
-				float Tweight = (diff - Math.abs(diff-wall))/diff;
-				float Bweight = (Math.abs(diff-wall))/diff;
+//				float diff = Math.abs(upperBound-lowerBound);
+	//			float wall = frame - lowerBound;
+		//		float Tweight = (diff - Math.abs(diff-wall))/diff;
+			//	float Bweight = (Math.abs(diff-wall))/diff;
 				
 				//lets do time and the property
 				
@@ -141,19 +141,20 @@ implements Keyframeable {
 			//	float Tweight = (diff-Math.abs(diff-wall))/diff;
 			//	float Bweight = (Math.abs(diff-wall))/diff;
 				
-				float megaTrans = bTrans.x+(tTrans.x-bTrans.x)*((float)(frame-lowerBound)/((float)upperBound-lowerBound));
+				//float megaTrans = bTrans.x+(tTrans.x-bTrans.x)*((float)(frame-lowerBound)/((float)upperBound-lowerBound));
 				
-				//Tweight = (float)(frame-lowerBound)/(float)(upperBound-lowerBound);
-				//Bweight = (float)(upperBound-frame)/(float)(upperBound-lowerBound);
+				float Tweight = (float)(frame-lowerBound)/(float)(upperBound-lowerBound);
+				float Bweight = (float)(upperBound-frame)/(float)(upperBound-lowerBound);
 			/*	System.out.println(frame+"");
-				System.out.println(lowerBound);
+				System.out.println(lowerBound);*/
 				
 				System.out.println(""+Tweight);
-				System.out.println(""+Bweight);*/
+				//System.out.println("BLIN:"+Bweight);
+				
 
 				this.setTranslation(	
-						megaTrans,
-						//(Bweight*bottom.translation.x + Tweight*top.translation.x),
+						//megaTrans,
+						(Bweight*bottom.translation.x + Tweight*top.translation.x),
 						(Bweight*bottom.translation.y + Tweight*top.translation.y), 
 						(Bweight*bottom.translation.z + Tweight*top.translation.z));
 
@@ -233,30 +234,48 @@ implements Keyframeable {
 				//System.out.println(bottom.translation.z+"");
 				//System.out.println(top.translation.z+"");
 
-				float diff = Math.abs(upperBound-lowerBound);
-				float wall = frame - lowerBound;
-				float Tweight = (diff - Math.abs(diff-wall))/diff;
-				float Bweight = (Math.abs(diff-wall))/diff;
+				float Tweight = (float)(frame-lowerBound)/(float)(upperBound-lowerBound);
+				float Bweight = (float)(upperBound-frame)/(float)(upperBound-lowerBound);
 
 				Matrix4f splineMat = new Matrix4f(0, 2, 0, 0,
 												 -1, 0, 1, 0,
 												  2,-5, 4,-1,
 												 -1, 3,-3, 1);
+				
 				Vector4f pointVec = new Vector4f(botBound,lowerBound,upperBound,topBound);
-				Vector4f timeVec = new Vector4f((float)0.5, (float)0.5*frame, (float)(0.5*Math.pow(frame, 2)), (float)(0.5*Math.pow(frame, 3)));
-				
+				Vector4f timeVecTop = new Vector4f((float)0.5,(float)0.5*Tweight, (float)(0.5*Math.pow(Tweight, 2)),(float)(0.5*Math.pow(Tweight, 3)));
+											//(float)(0.5*Math.pow(Tweight, 3)),(float)(0.5*Math.pow(Tweight, 2)),(float)0.5*Tweight
+											//	,(float)0.5);
+				Vector4f timeVecBot = new Vector4f((float)0.5,(float)0.5*Bweight, (float)(0.5*Math.pow(Bweight, 2)),(float)(0.5*Math.pow(Bweight, 3)));
+					//	,(float)0.5);
+				/*		
+				System.out.print("w: "+timeVecTop.w);
+				System.out.print(" x: "+timeVecTop.x);
+				System.out.print(" y: "+timeVecTop.y);
+				System.out.println(" z: " + timeVecTop.z);
+				*/
 				Vector4f rhs = new Vector4f();
-				splineMat.transform(pointVec, rhs);
-				float result = timeVec.dot(rhs);
-				System.out.println(result+"");
 				
-				/*System.out.println(""+Tweight);
-				System.out.println(""+Bweight);*/
+				splineMat.transform(pointVec, rhs);
+				Tweight = (timeVecTop.dot(rhs))/(upperBound-lowerBound);
+				Bweight = (timeVecBot.dot(rhs))/(upperBound-lowerBound);
+				
+			/*	System.out.print("w: "+rhs.w);
+				System.out.print(" x: "+rhs.x);
+				System.out.print(" y: "+rhs.y);
+				System.out.println(" z: " + rhs.z);
+				System.out.println("result: "+Tweight);*/
+				
+				System.out.println(""+Tweight);
+				//System.out.println("Bweight "+Bweight);
 
 				this.setTranslation(
-						(Bweight*bottom.translation.x + Tweight*top.translation.x),
-						(Bweight*bottom.translation.y + Tweight*top.translation.y), 
-						(Bweight*bottom.translation.z + Tweight*top.translation.z));
+						(Bweight*bottom.translation.x + 
+								Tweight*top.translation.x),
+						(Bweight*bottom.translation.y + 
+								Tweight*top.translation.y), 
+						(Bweight*bottom.translation.z + 
+								Tweight*top.translation.z));
 
 				/*System.out.println("x trans "+this.translation.x);
 				System.out.println("y trans "+this.translation.y);
