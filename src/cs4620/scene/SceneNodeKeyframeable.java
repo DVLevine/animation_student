@@ -145,11 +145,13 @@ implements Keyframeable {
 				
 				float Tweight = (float)(frame-lowerBound)/(float)(upperBound-lowerBound);
 				float Bweight = (float)(upperBound-frame)/(float)(upperBound-lowerBound);
-			/*	System.out.println(frame+"");
-				System.out.println(lowerBound);*/
+				
+				
+				/*System.out.println(frame+"");
+				System.out.println(lowerBound);
 				
 				System.out.println(""+Tweight);
-				//System.out.println("BLIN:"+Bweight);
+				System.out.println("BLIN:"+Bweight);*/
 				
 
 				this.setTranslation(	
@@ -157,6 +159,7 @@ implements Keyframeable {
 						(Bweight*bottom.translation.x + Tweight*top.translation.x),
 						(Bweight*bottom.translation.y + Tweight*top.translation.y), 
 						(Bweight*bottom.translation.z + Tweight*top.translation.z));
+				
 
 				/*System.out.println("x trans "+this.translation.x);
 				System.out.println("y trans "+this.translation.y);
@@ -257,8 +260,8 @@ implements Keyframeable {
 				Vector4f rhs = new Vector4f();
 				
 				splineMat.transform(pointVec, rhs);
-				Tweight = (timeVecTop.dot(rhs))/(upperBound-lowerBound);
-				Bweight = (timeVecBot.dot(rhs))/(upperBound-lowerBound);
+				Tweight = ((timeVecTop.dot(rhs))/(upperBound-lowerBound)) % 1;
+				Bweight = ((timeVecBot.dot(rhs))/(upperBound-lowerBound)) % 1;
 				
 			/*	System.out.print("w: "+rhs.w);
 				System.out.print(" x: "+rhs.x);
@@ -266,7 +269,8 @@ implements Keyframeable {
 				System.out.println(" z: " + rhs.z);
 				System.out.println("result: "+Tweight);*/
 				
-				System.out.println(""+Tweight);
+			//	System.out.println(""+Tweight);
+				//System.out.println(""+Bweight);
 				//System.out.println("Bweight "+Bweight);
 
 				this.setTranslation(
