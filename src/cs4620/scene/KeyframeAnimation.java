@@ -68,18 +68,29 @@ public class KeyframeAnimation {
 		
 		float dotProd = w1*w2+x1*x2+y1*y2+z1*z2;
 		System.out.println (""+dotProd);
-		float psi;
-		if ( Float.isNaN(dotProd) && Math.abs(dotProd)>=0.001){
-			psi = (float) Math.acos(dotProd);
-		}
-		else{
+		float psi = (float) Math.acos(dotProd);
+		
+		if (!Float.isNaN(psi) || Math.abs(psi)>0.001)
 			if (dotProd>=0){
-			psi = (float) 0.0001;
+				psi = (float) 0.001;
+				}
+				else{
+					psi = (float)-0.001;
+				}
+		else{
+		}
+		
+	//	if ( Float.isNaN(dotProd) && Math.abs(dotProd)>=0.001){
+		//	psi = (float) Math.acos(dotProd);
+	//	}
+	/*	else{
+			if (dotProd>=0){
+			psi = (float) 0.001;
 			}
 			else{
-				psi = (float)-0.0001;
+				psi = (float)-0.001;
 			}
-		}
+		}*/
 		System.out.println ("psi: "+Math.toDegrees(psi));
 		
 		i1.scale((float) (Math.sin((1-t)*psi)/Math.sin(psi)));
@@ -108,13 +119,13 @@ public class KeyframeAnimation {
 		float b;
 		float c;
 
-		float test = (w*y-z*x);
+		float test = 2*(w*y-z*x);
 		System.out.println("WX "+w*y);
 		System.out.println("ZX " +z*x);
 		System.out.println("TEST "+ test);
-		//if (Math.abs(test)>0.9999){
-		if (Float.isNaN(test) ){
-			if ((w*y)>0){
+		if (Math.abs(test)>0.9999){
+		//if (Float.isNaN(test) ){
+			if (test>0){
 				a =(float) (2*Math.atan2(x,w));
 				b = (float) (Math.PI/2);
 				c = 0;
