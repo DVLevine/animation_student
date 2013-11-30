@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 
 import javax.media.opengl.GL2;
 import javax.vecmath.Matrix4f;
+import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4f;
 
 
@@ -119,20 +120,33 @@ implements Keyframeable {
 
 				SceneNode bottom = keyframes.get(lowerBound);
 				SceneNode top = keyframes.get(upperBound);
+				
+				Vector3f bTrans = bottom.translation;
+				Vector3f tTrans = top.translation;
 
 				//System.out.println(bottom.translation.z+"");
 				//System.out.println(top.translation.z+"");
-
+/*
 				float diff = Math.abs(upperBound-lowerBound);
 				float wall = frame - lowerBound;
 				float Tweight = (diff - Math.abs(diff-wall))/diff;
+				float Bweight = (Math.abs(diff-wall))/diff;*/
+				
+				//lets do time and the property
+				
+				float diff = Math.abs(tTrans.x-bTrans.x);
+				float wall = this.translation.x - bTrans.x;
+				float Tweight = (diff-Math.abs(diff-wall))/diff;
 				float Bweight = (Math.abs(diff-wall))/diff;
-
+				
+				float megaTrans = bTrans.x+(tTrans.x-bTrans.x)*((frame-lowerBound)/(upperBound-lowerBound));
+				System.out.println(megaTrans);
 				/*System.out.println(""+Tweight);
 				System.out.println(""+Bweight);*/
 
 				this.setTranslation(
-						(Bweight*bottom.translation.x + Tweight*top.translation.x),
+						megaTrans,
+						//(Bweight*bottom.translation.x + Tweight*top.translation.x),
 						(Bweight*bottom.translation.y + Tweight*top.translation.y), 
 						(Bweight*bottom.translation.z + Tweight*top.translation.z));
 
@@ -222,8 +236,12 @@ implements Keyframeable {
 												  2,-5, 4,-1,
 												 -1, 3,-3, 1);
 				Vector4f pointVec = new Vector4f(botBound,lowerBound,upperBound,topBound);
-				Vector4f timeVec = new Vector4f();
+				Vector4f timeVec = new Vector4f((float)0.5, (float)0.5*frame, (float)(0.5*Math.pow(frame, 2)), (float)(0.5*Math.pow(frame, 3)));
 				
+				Vector4f rhs = new Vector4f();
+				splineMat.transform(pointVec, rhs);
+				float result = timeVec.dot(rhs);
+				System.out.println(result+"");
 				
 				/*System.out.println(""+Tweight);
 				System.out.println(""+Bweight);*/
