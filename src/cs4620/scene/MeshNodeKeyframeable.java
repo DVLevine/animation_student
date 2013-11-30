@@ -145,9 +145,10 @@ public class MeshNodeKeyframeable extends MeshNode implements Keyframeable {
 				SceneNode bottom = keyframes.get(lowerBound);
 				SceneNode top = keyframes.get(upperBound);
 
-				float Tweight = (float)(frame-lowerBound)/(float)(upperBound-lowerBound);
-				float Bweight = (float)(upperBound-frame)/(float)(upperBound-lowerBound);
+				float Tweight = ((float)frame-(float)lowerBound)* (float)Math.pow(((double)upperBound-(double)lowerBound), -1);
+				float Bweight = ((float)upperBound-(float)frame)* (float)Math.pow(((double)upperBound-(double)lowerBound),-1);
 
+			
 				this.setTranslation(	
 						(Bweight*bottom.translation.x + Tweight*top.translation.x),
 						(Bweight*bottom.translation.y + Tweight*top.translation.y), 
@@ -164,10 +165,11 @@ public class MeshNodeKeyframeable extends MeshNode implements Keyframeable {
 				Vector3f resultV = KeyframeAnimation.getEulerAnglesFromQuaternion(resultQ);
 				
 				this.setRotation(resultV.x,resultV.y,resultV.z);
-				System.out.println("Tweight " + Tweight);
-				System.out.print("Rotation x: " + resultV.x);
+				//System.out.print("" + frame);
+				//System.out.format(" %f%n", Tweight);
+				/*System.out.print("Rotation x: " + resultV.x);
 				System.out.print(" Rotation.y: " + resultV.y);
-				System.out.println(" Rotation.z: " + resultV.z);
+				System.out.println(" Rotation.z: " + resultV.z);*/
 
 
 			}	
@@ -243,6 +245,8 @@ public class MeshNodeKeyframeable extends MeshNode implements Keyframeable {
 				Bweight = ((timeVecBot.dot(rhs))/(upperBound-lowerBound)) % 1;
 				
 				
+				System.out.print("" + frame);
+				System.out.format(" %f%n", Tweight);
 				this.setTranslation(
 						(Bweight*bottom.translation.x + Tweight*top.translation.x),
 						(Bweight*bottom.translation.y + Tweight*top.translation.y), 

@@ -66,13 +66,27 @@ public class KeyframeAnimation {
 		float y2 = i2.z;
 		float z2 = i2.w;
 		
-		float dotProd = w1*w2+x1*x2+y1*y2+z1*z2;		
-		float psi = (float) Math.acos(dotProd);
-		
+		float dotProd = w1*w2+x1*x2+y1*y2+z1*z2;
+		System.out.println (""+dotProd);
+		float psi;
+		if ( Float.isNaN(dotProd) && Math.abs(dotProd)>=0.001){
+			psi = (float) Math.acos(dotProd);
+		}
+		else{
+			if (dotProd>=0){
+			psi = (float) 0.0001;
+			}
+			else{
+				psi = (float)-0.0001;
+			}
+		}
 		System.out.println ("psi: "+Math.toDegrees(psi));
 		
 		i1.scale((float) (Math.sin((1-t)*psi)/Math.sin(psi)));
 		i2.scale((float) (Math.sin(t*psi)/Math.sin(psi)));
+		
+		System.out.println(Math.sin(1-t)*psi);
+		System.out.println(Math.sin(t*psi));
 		
 		Quat4f lingo = i1;
 		lingo.add(i2);
@@ -95,11 +109,16 @@ public class KeyframeAnimation {
 		float c;
 
 		float test = (w*y-z*x);
-		if (Math.abs(test)>0.9999){
-			if (test>0){
+		System.out.println("WX "+w*y);
+		System.out.println("ZX " +z*x);
+		System.out.println("TEST "+ test);
+		//if (Math.abs(test)>0.9999){
+		if (Float.isNaN(test) ){
+			if ((w*y)>0){
 				a =(float) (2*Math.atan2(x,w));
 				b = (float) (Math.PI/2);
 				c = 0;
+				System.out.println("HEY I'M HERE");
 			}
 			else{
 				a =(float) (-2*Math.atan2(x,w));
@@ -113,6 +132,10 @@ public class KeyframeAnimation {
 			c = (float) (Math.atan2(2*(w*z+x*y),1-2*(Math.pow(y,2)+Math.pow(z,2))));
 		}
 
+		System.out.println("a: " + a);
+		System.out.println("b: "+b);
+		System.out.println("c: " +c);
+		
 		float final_a = (float)Math.toDegrees(a);
 		float final_b = (float)Math.toDegrees(b);
 		float final_c = (float)Math.toDegrees(c);
