@@ -151,8 +151,8 @@ implements Keyframeable {
 				Quat4f resultQ = KeyframeAnimation.slerp(botQuat, topQuat, Tweight);
 				Vector3f resultV = KeyframeAnimation.getEulerAnglesFromQuaternion(resultQ);
 				
-				this.setRotation(resultV.x,resultV.y,resultV.z);
-			/*	System.out.print("Rotation x: " + resultV.x);
+				/*this.setRotation(resultV.x,resultV.y,resultV.z);
+				System.out.print("Rotation x: " + resultV.x);
 				System.out.print(" Rotationy: " + resultV.y);
 				System.out.println(" Rotationz: " + resultV.z);*/
 				

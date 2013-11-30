@@ -164,6 +164,7 @@ public class MeshNodeKeyframeable extends MeshNode implements Keyframeable {
 				Vector3f resultV = KeyframeAnimation.getEulerAnglesFromQuaternion(resultQ);
 				
 				this.setRotation(resultV.x,resultV.y,resultV.z);
+				System.out.println("Tweight " + Tweight);
 				System.out.print("Rotation x: " + resultV.x);
 				System.out.print(" Rotation.y: " + resultV.y);
 				System.out.println(" Rotation.z: " + resultV.z);

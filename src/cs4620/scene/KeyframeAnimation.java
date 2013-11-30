@@ -69,6 +69,8 @@ public class KeyframeAnimation {
 		float dotProd = w1*w2+x1*x2+y1*y2+z1*z2;		
 		float psi = (float) Math.acos(dotProd);
 		
+		System.out.println ("psi: "+Math.toDegrees(psi));
+		
 		i1.scale((float) (Math.sin((1-t)*psi)/Math.sin(psi)));
 		i2.scale((float) (Math.sin(t*psi)/Math.sin(psi)));
 		
@@ -144,11 +146,11 @@ public class KeyframeAnimation {
 		Quat4f qy = new Quat4f((float)Math.cos(b/2),y.x,y.y,y.z);
 		Quat4f qz = new Quat4f((float)Math.cos(c/2),z.x,z.y,z.z);
 
-		Quat4f bingo = qx;
+		Quat4f bingo = qy;
 
-		bingo.mul(qy);
-		bingo.mul(qz);
+		bingo.mul(qx);
+		qz.mul(bingo);
 
-		return bingo;
+		return qz;
 	}
 }
