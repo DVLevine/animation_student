@@ -89,6 +89,8 @@ implements Keyframeable {
 		keyframes.remove(new Integer(frame));
 	}
 
+	
+	
 	@Override
 	public void linearInterpolateTo(int frame) {
 		// TODO (Animation P1): Set the state of this node to the specified frame by
@@ -126,25 +128,30 @@ implements Keyframeable {
 
 				//System.out.println(bottom.translation.z+"");
 				//System.out.println(top.translation.z+"");
-/*
+
 				float diff = Math.abs(upperBound-lowerBound);
 				float wall = frame - lowerBound;
 				float Tweight = (diff - Math.abs(diff-wall))/diff;
-				float Bweight = (Math.abs(diff-wall))/diff;*/
+				float Bweight = (Math.abs(diff-wall))/diff;
 				
 				//lets do time and the property
 				
-				float diff = Math.abs(tTrans.x-bTrans.x);
-				float wall = this.translation.x - bTrans.x;
-				float Tweight = (diff-Math.abs(diff-wall))/diff;
-				float Bweight = (Math.abs(diff-wall))/diff;
+			//	float diff = Math.abs(tTrans.x-bTrans.x);
+			//	float wall = this.translation.x - bTrans.x;
+			//	float Tweight = (diff-Math.abs(diff-wall))/diff;
+			//	float Bweight = (Math.abs(diff-wall))/diff;
 				
-				float megaTrans = bTrans.x+(tTrans.x-bTrans.x)*((frame-lowerBound)/(upperBound-lowerBound));
-				System.out.println(megaTrans);
-				/*System.out.println(""+Tweight);
+				float megaTrans = bTrans.x+(tTrans.x-bTrans.x)*((float)(frame-lowerBound)/((float)upperBound-lowerBound));
+				
+				//Tweight = (float)(frame-lowerBound)/(float)(upperBound-lowerBound);
+				//Bweight = (float)(upperBound-frame)/(float)(upperBound-lowerBound);
+			/*	System.out.println(frame+"");
+				System.out.println(lowerBound);
+				
+				System.out.println(""+Tweight);
 				System.out.println(""+Bweight);*/
 
-				this.setTranslation(
+				this.setTranslation(	
 						megaTrans,
 						//(Bweight*bottom.translation.x + Tweight*top.translation.x),
 						(Bweight*bottom.translation.y + Tweight*top.translation.y), 
