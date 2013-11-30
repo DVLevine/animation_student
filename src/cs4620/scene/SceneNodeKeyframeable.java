@@ -8,6 +8,8 @@ import java.util.Map.Entry;
 
 import javax.media.opengl.GL2;
 import javax.vecmath.Matrix4f;
+import javax.vecmath.Quat4f;
+import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4f;
 
@@ -117,49 +119,21 @@ implements Keyframeable {
 			else {	
 				int upperBound = keyframes.ceilingKey(frame);
 				int lowerBound = keyframes.floorKey(frame);
-				//System.out.println(lowerBound+"");
-				//System.out.println(upperBound+ "");
 
 				SceneNode bottom = keyframes.get(lowerBound);
 				SceneNode top = keyframes.get(upperBound);
 				
 				Vector3f bTrans = bottom.translation;
 				Vector3f tTrans = top.translation;
-
-				//System.out.println(bottom.translation.z+"");
-				//System.out.println(top.translation.z+"");
-
-//				float diff = Math.abs(upperBound-lowerBound);
-	//			float wall = frame - lowerBound;
-		//		float Tweight = (diff - Math.abs(diff-wall))/diff;
-			//	float Bweight = (Math.abs(diff-wall))/diff;
-				
-				//lets do time and the property
-				
-			//	float diff = Math.abs(tTrans.x-bTrans.x);
-			//	float wall = this.translation.x - bTrans.x;
-			//	float Tweight = (diff-Math.abs(diff-wall))/diff;
-			//	float Bweight = (Math.abs(diff-wall))/diff;
-				
-				//float megaTrans = bTrans.x+(tTrans.x-bTrans.x)*((float)(frame-lowerBound)/((float)upperBound-lowerBound));
 				
 				float Tweight = (float)(frame-lowerBound)/(float)(upperBound-lowerBound);
 				float Bweight = (float)(upperBound-frame)/(float)(upperBound-lowerBound);
 				
-				
-				/*System.out.println(frame+"");
-				System.out.println(lowerBound);
-				
-				System.out.println(""+Tweight);
-				System.out.println("BLIN:"+Bweight);*/
-				
 
 				this.setTranslation(	
-						//megaTrans,
 						(Bweight*bottom.translation.x + Tweight*top.translation.x),
 						(Bweight*bottom.translation.y + Tweight*top.translation.y), 
 						(Bweight*bottom.translation.z + Tweight*top.translation.z));
-				
 
 				/*System.out.println("x trans "+this.translation.x);
 				System.out.println("y trans "+this.translation.y);
@@ -170,6 +144,21 @@ implements Keyframeable {
 						(Bweight*bottom.scaling.x+Tweight*top.scaling.x),
 						(Bweight*bottom.scaling.y+Tweight*top.scaling.y),
 						(Bweight*bottom.scaling.z+Tweight*top.scaling.z));		
+				
+				
+				Quat4f botQuat = KeyframeAnimation.getQuaternionFromEulerAngles(bottom.rotation);
+				Quat4f topQuat = KeyframeAnimation.getQuaternionFromEulerAngles(top.rotation);
+				Quat4f resultQ = KeyframeAnimation.slerp(botQuat, topQuat, Tweight);
+				Vector3f resultV = KeyframeAnimation.getEulerAnglesFromQuaternion(resultQ);
+				
+				this.setRotation(resultV.x,resultV.y,resultV.z);
+			/*	System.out.print("Rotation x: " + resultV.x);
+				System.out.print(" Rotationy: " + resultV.y);
+				System.out.println(" Rotationz: " + resultV.z);*/
+				
+				
+						
+				
 			}	
 		}
 
@@ -210,8 +199,7 @@ implements Keyframeable {
 				int lowerBound = keyframes.floorKey(frame);
 				int topBound;
 				int botBound;
-				//System.out.println(lowerBound+"");
-				//System.out.println(upperBound+ "");
+				
 				if (keyframes.ceilingKey(upperBound) == null){
 					topBound = upperBound;
 				}
@@ -226,16 +214,8 @@ implements Keyframeable {
 					botBound = keyframes.ceilingKey(lowerBound);
 				}
 				
-				SceneNode ancient = keyframes.get(botBound);
-				SceneNode old = keyframes.get(lowerBound);
-				SceneNode present = keyframes.get(upperBound);
-				SceneNode future = keyframes.get(topBound);
-
 				SceneNode bottom = keyframes.get(lowerBound);
 				SceneNode top = keyframes.get(upperBound);
-
-				//System.out.println(bottom.translation.z+"");
-				//System.out.println(top.translation.z+"");
 
 				float Tweight = (float)(frame-lowerBound)/(float)(upperBound-lowerBound);
 				float Bweight = (float)(upperBound-frame)/(float)(upperBound-lowerBound);
@@ -247,8 +227,6 @@ implements Keyframeable {
 				
 				Vector4f pointVec = new Vector4f(botBound,lowerBound,upperBound,topBound);
 				Vector4f timeVecTop = new Vector4f((float)0.5,(float)0.5*Tweight, (float)(0.5*Math.pow(Tweight, 2)),(float)(0.5*Math.pow(Tweight, 3)));
-											//(float)(0.5*Math.pow(Tweight, 3)),(float)(0.5*Math.pow(Tweight, 2)),(float)0.5*Tweight
-											//	,(float)0.5);
 				Vector4f timeVecBot = new Vector4f((float)0.5,(float)0.5*Bweight, (float)(0.5*Math.pow(Bweight, 2)),(float)(0.5*Math.pow(Bweight, 3)));
 					//	,(float)0.5);
 				/*		
